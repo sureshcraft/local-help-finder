@@ -1,0 +1,69 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files — real secrets ignored, but COMMIT the template (.env.example has no secrets)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# editor settings (local watcher excludes — keep the 18GB Mac from freezing on dual-IDE indexing)
+.vscode/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# ── prep / strategy / personal — LOCAL ONLY, never publish to the public event repo ──
+# These stay on disk (you and the agent still read them during the build); they simply
+# never get committed or pushed. The automated scan reads CODE, not these notes — and
+# some contain personal emails, the reverse-engineered rubric, and day-of strategy that
+# should not be visible to judges or rival participants.
+SETUP-BEFORE-EVENT.md
+DAY-OF-RUNBOOK.md
+SCORING.md
+GOOGLE-SERVICES-TRIAL.md
+REQUIREMENT-TO-PLAN.md
+NOTES.md
+README.template.md
+
+# ── AI build config — LOCAL ONLY ──
+# Our AGENTS.md is a strategy playbook and .claude/.agents hold skills named
+# "promptwars-winning-recipe" etc. No winner published anything like that (the ones who
+# kept AI files shipped only a tiny boilerplate AGENTS + one-line CLAUDE). So keep ours
+# local: the agent still reads them during the build; the PUBLIC repo stays a clean app
+# + product README, matching the FlowMind / carboncut / Pebbl winner format.
+AGENTS.md
+CLAUDE.md
+.claude/
+.agents/
