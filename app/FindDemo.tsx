@@ -2,21 +2,32 @@
 
 import { useState } from "react";
 import { ServiceCard } from "@/components/ServiceCard";
-import type { Match } from "@/lib/types";
+import { ReasoningStrip } from "@/components/ReasoningStrip";
+import type { Match, Needs } from "@/lib/types";
+
+type FindResult = { needs: Needs; matches: Match[]; considered: number; fallback?: boolean };
 
 const SAMPLE =
-  "my elderly father in T.Nagar needs physiotherapy after knee surgery and maybe a wheelchair on rent, budget is tight around 800 rupees a session";
+  "my elderly father in Adyar needs physiotherapy after knee surgery and maybe a wheelchair on rent, budget is tight around 800 rupees a session";
+
+function chipsFor(needs: Needs): string[] {
+  const chips = [...(needs.categories ?? [])];
+  if (needs.area) chips.push(`area: ${needs.area}`);
+  if (needs.budget != null) chips.push(`budget ₹${needs.budget}`);
+  (needs.constraints ?? []).forEach((c) => chips.push(c));
+  return chips;
+}
 
 export default function FindDemo() {
   const [text, setText] = useState("");
-  const [matches, setMatches] = useState<Match[] | null>(null);
+  const [result, setResult] = useState<FindResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function run() {
     setLoading(true);
     setError(null);
-    setMatches(null);
+    setResult(null);
     try {
       const res = await fetch("/api/find", {
         method: "POST",
@@ -24,14 +35,19 @@ export default function FindDemo() {
         body: JSON.stringify({ text }),
       });
       if (!res.ok) throw new Error("request failed");
-      const json = await res.json();
-      setMatches(json.matches ?? []);
+      setResult(await res.json());
     } catch {
       setError("Could not fetch help right now. Please try again.");
     } finally {
       setLoading(false);
     }
   }
+
+  const summary = result
+    ? result.fallback
+      ? "Offline fallback — showing best guesses."
+      : `Understood the need, searched ${result.considered} services, showing ${result.matches.length}.`
+    : undefined;
 
   return (
     <div className="w-full max-w-2xl">
@@ -44,7 +60,7 @@ export default function FindDemo() {
         onChange={(e) => setText(e.target.value)}
         rows={3}
         className="mt-1 w-full rounded-lg border border-neutral-300 p-3 text-neutral-900"
-        placeholder="e.g. elderly father needs physiotherapy after surgery, tight budget..."
+        placeholder="e.g. elderly father in Adyar needs physiotherapy after surgery, tight budget..."
       />
       <div className="mt-3 flex gap-2">
         <button
@@ -69,11 +85,12 @@ export default function FindDemo() {
             {error}
           </p>
         )}
-        {matches && matches.length === 0 && (
+        {result && <ReasoningStrip chips={chipsFor(result.needs)} summary={summary} />}
+        {result && result.matches.length === 0 && (
           <p className="text-sm text-neutral-500">No matching services found.</p>
         )}
-        {matches?.map((m) => (
-          <ServiceCard key={m.id} m={m} />
+        {result?.matches.map((m, i) => (
+          <ServiceCard key={m.id} m={m} showMap={i === 0} />
         ))}
       </div>
     </div>
