@@ -20,10 +20,22 @@ export function affordable(s: { cost: number }, budget?: number): boolean {
   return budget == null || s.cost <= budget;
 }
 
-/** Drop unaffordable services, attach distance, sort nearest-first then by score. */
-export function rankMatches(scored: Scored[], origin: LatLng, budget?: number): Match[] {
+/**
+ * Drop unaffordable services, then rank by a BLENDED score: relevance leads, distance is a gentle
+ * penalty (so a marginally-relevant service 200m away can't beat the best match a little further).
+ */
+export function rankMatches(
+  scored: Scored[],
+  origin: LatLng,
+  budget?: number,
+  distancePenaltyPerKm = 0.03,
+): Match[] {
   return scored
     .filter((s) => affordable(s, budget))
-    .map((s) => ({ ...s, distanceKm: haversineKm(origin, s) }))
-    .sort((a, b) => a.distanceKm - b.distanceKm || b.score - a.score);
+    .map((s) => {
+      const distanceKm = haversineKm(origin, s);
+      return { match: { ...s, distanceKm } as Match, rank: s.score - distanceKm * distancePenaltyPerKm };
+    })
+    .sort((a, b) => b.rank - a.rank)
+    .map((x) => x.match);
 }

@@ -21,6 +21,7 @@ function chipsFor(needs: Needs): string[] {
 export default function FindDemo() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<FindResult | null>(null);
+  const [cached, setCached] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +29,7 @@ export default function FindDemo() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setCached(false);
     try {
       const res = await fetch("/api/find", {
         method: "POST",
@@ -35,6 +37,7 @@ export default function FindDemo() {
         body: JSON.stringify({ text }),
       });
       if (!res.ok) throw new Error("request failed");
+      setCached(res.headers.get("X-Cache") === "HIT");
       setResult(await res.json());
     } catch {
       setError("Could not fetch help right now. Please try again.");
@@ -74,18 +77,29 @@ export default function FindDemo() {
           type="button"
           onClick={run}
           disabled={loading || !text.trim()}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
         >
           {loading ? "Finding…" : "Find help"}
         </button>
       </div>
-      <div role="status" aria-live="polite" className="mt-6 space-y-3">
+      <div role="status" aria-live="polite" aria-busy={loading} className="mt-6 space-y-3">
         {error && (
           <p role="alert" className="text-sm text-red-600">
             {error}
           </p>
         )}
-        {result && <ReasoningStrip chips={chipsFor(result.needs)} summary={summary} />}
+        {result && (
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <ReasoningStrip chips={chipsFor(result.needs)} summary={summary} />
+            </div>
+            {cached && (
+              <span className="whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-amber-200">
+                ⚡ Cached
+              </span>
+            )}
+          </div>
+        )}
         {result && result.matches.length === 0 && (
           <p className="text-sm text-neutral-500">No matching services found.</p>
         )}

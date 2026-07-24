@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizeInput } from "../lib/prompts";
+import { sanitizeInput } from "../lib/sanitize";
 
 // Defence-in-depth: user text is untrusted, sanitise before it enters a prompt (Security axis).
 describe("sanitizeInput", () => {

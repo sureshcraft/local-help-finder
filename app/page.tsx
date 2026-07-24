@@ -18,7 +18,7 @@ export default function Home() {
         className="flex min-h-screen flex-col items-center gap-10 bg-neutral-50 px-6 py-16"
       >
         <div className="max-w-2xl text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-emerald-600">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-emerald-700">
             Local Help Finder · Chennai
           </p>
           <h1 className="text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl">
