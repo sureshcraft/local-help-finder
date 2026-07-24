@@ -16,6 +16,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  output: "standalone", // smaller image + reliable Cloud Run deploy
   async headers() {
     return [
       {
